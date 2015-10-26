@@ -2,7 +2,7 @@
 var fs = require('fs');
 var PATH = "/home/";
 function createFile (fileName, extension, data) {
-	fs.writeFile(PATH+fileName+'.'+extension, data,function(err) {
+	fs.writeFile(PATH+fileName+extension, data,function(err) {
 	    if(err) throw err;
 	    console.log("The file was created!");
 	});
