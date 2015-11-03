@@ -4,8 +4,11 @@ var exec = require("child_process").exec;
 var fb = require('firebird');
 var cfg = require("./dbconfig").cfg;
 var conn = fb.createConnection();
-
+var PATH = "/home/nikita/ProgrammingGolf/tests/";
+var waitTime =0;
+var outputFile="/home/nikita/ProgrammingGolf/tests/out";
 function compilation(fileName, language_id) {
+	var options;
 	var execFileName =fileName;
 	//подключаемся к бд
 	conn.connect(cfg.db, cfg.user, cfg.password, cfg.role, function(){
@@ -13,18 +16,21 @@ function compilation(fileName, language_id) {
 		//читаем компилятор из БД
 		conn.query("select path from PROGRAM_LANGUAGES where ID_PROGRAM_LANGUAGE="+language_id, function(err,res){
 			if(err){ 
-			     console.log("error");
-			     console.log(err);
-			     return;  
+		     		console.log("error");
+		     		console.log(err);
+		     		return;  
 			}
+			console.log("test");
 		 	var r = res.fetchSync("all",false);
 			var compilator=r.toString();
+			console.log(compilator);
 		//Если компилятор есть, то делаем имя исполняемого файла Main
 			if (compilator!="")
 			{
-				execFileName="Main";
+				waitTime = 500;
+				console.log("I have compilator");
+				execFileName=PATH+"Main";
 			//читаем опции компилятора
-				console.log(compilator);
 				conn.query("select COMPILER_OPTIONS from PROGRAM_LANGUAGES where ID_PROGRAM_LANGUAGE="+language_id, 						function(err2,res2){
 					if(err){ 
 					     console.log("error2");
@@ -32,11 +38,12 @@ function compilation(fileName, language_id) {
 					     return;  
 					}
 				 	var r2 = res2.fetchSync("all",false);
-					var options=r2.toString();
+					 options=r2.toString();
 			// если опции есть, то запускаем компилятор с именем файла  и опциями
 					if (options!="")
 					{
-						exec(compilator+" "+ fileName+options+" Main"+" 2>log");
+						console.log("I have options");
+						exec(compilator+" "+ fileName+" "+options+" "+execFileName+" 2>log");
 						console.log(options);
 						
 					} 
@@ -49,20 +56,28 @@ function compilation(fileName, language_id) {
 			}
 			//доделать БД и проверить
 			//читаем из БД команду для запуска программы и запускаем её
-			conn.query("select execCommand from PROGRAM_LANGUAGES where ID_PROGRAM_LANGUAGE="+language_id, 					function(err3,res3){
+			conn.query("select comand_to_exec from PROGRAM_LANGUAGES where ID_PROGRAM_LANGUAGE="+language_id, 					function(err3,res3){
 				if(err){ 
 					console.log("error3");
 					console.log(err3);
 					return;  
 				}
+			
 				var r3 = res3.fetchSync("all",false);
+				console.log(execFileName);
 				var execCommand=r3.toString();
-				exec(execCommand+" "+execFileName);				
-				
+				console.log(execCommand+"qwe");
+				//пришлось сделать задержку, так как (насколько я понимаю) исполняемый файл создается долго, и исполнение без 					//задержки происходит до того, как создаться исполняемый файл
+				setTimeout(function() {
+					console.log(execCommand+" "+execFileName+" >"+outputFile);
+					exec(execCommand+" "+execFileName+" >"+outputFile);
+				}, waitTime);				
+				conn.disconnect();
 			});	
 				
 		});
+		
 	});
 }
-compilation("/home/nikita/sysprog/accviol.cpp",4);
+compilation("/home/nikita/ProgrammingGolf/tests/test.js",7);
 //exports.compilation=compilation;

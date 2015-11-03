@@ -1,5 +1,5 @@
 var codeFile = require("./createFile");
-var compilator =require("./compilation");
+//var compilator =require("./compilation");
 
 
 var fb = require('firebird');
@@ -20,6 +20,7 @@ function readSolution(id) {
 		}
          	var r = res.fetchSync("all",false);
 	 	newFile.data=r.toString();
+		console.log(newFile);
   //читаю расширение файла		
 		conn.query("select ex_original_file from program_languages where id_program_language=(select program_language from solutions where 					id_solution="+id+")", function(err,res){
 		 	if(err){ 
@@ -32,10 +33,10 @@ function readSolution(id) {
 		 	newFile.ex=r.toString();
 		 	conn.disconnect();
 			//создаю файл		
-			codeFile.createFile("file1",newFile.ex,newFile.data);
+			codeFile.createFile("Main",newFile.ex,newFile.data);
 	     		});	
 		});
 	});
 }
-readSolution(1);
+readSolution(3);
 //compilator.compilation("/home/nikita/accviol.cpp","g++");
