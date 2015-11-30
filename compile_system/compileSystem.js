@@ -46,17 +46,24 @@ eventEmitter.on('text', function(progText){
 			else
 			{
 				console.log('file created');
+
+				//!АЛЕРТ*********!файл создается, но в ключевую точку не заходит
+				//срабатывают не все запросы к БД (остановка на ключевой точке)
 				//eventEmitter.emit('fileCreated', ext);
 			}
 			
 		});
+		//!АЛЕРТ*********!в ключевую точку заходит, но файл еще не создан, однако в ключевой точке пытается компилироваться то, чего нет
+		//все функции запросов к БД срабатывают.
 		eventEmitter.emit('fileCreated', ext);
 		
 	});
 });
 //когда файл создаен, и прочитан компилятор из БД, то компилируется
 eventEmitter.on('fileCreated',function(ext){
+	//!АЛЕРТ*********!в любом случае выполняется как надо
 	console.log('ext: '+ext);
+	//!АЛЕРТ*********!ключевая точка (никак не могу понять, почему читается компилятор)
 	eventEmitter.on('compiler', function(compiler){
 		console.log('compiler: '+compiler);
 		if (compiler!=""){
